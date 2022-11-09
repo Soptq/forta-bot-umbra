@@ -140,7 +140,7 @@ const detectsUmbraWithdraw = async (
               fromAddress: fromAddress,
               tokenAddress: tokenAddress,
               // @ts-ignore
-              amount: (amount as ethers.BigNumber).toBigInt().toString(),
+              amount: ethers.BigNumber.from(amount).toBigInt().toString(),
               // @ts-ignore
               receiveAddress: toAddress,
             },
@@ -154,8 +154,9 @@ const detectsUmbraWithdraw = async (
           })
         );
 
-        umbraCache[networkNumber][stealthAddress][tokenAddress].amount = umbraCache[networkNumber][stealthAddress][tokenAddress].amount.sub(amount);
-        if (umbraCache[networkNumber][stealthAddress][tokenAddress].amount.isZero()) {
+        umbraCache[networkNumber][stealthAddress][tokenAddress].amount =
+          umbraCache[networkNumber][stealthAddress][tokenAddress].amount.sub(amount);
+        if (umbraCache[networkNumber][stealthAddress][tokenAddress].amount.isNegative()) {
           delete umbraCache[networkNumber][stealthAddress][tokenAddress];
           if (Object.keys(umbraCache[networkNumber][stealthAddress]).length === 0) {
             delete umbraCache[networkNumber][stealthAddress];
@@ -178,15 +179,6 @@ const handleTransaction: HandleTransaction = async (
     return [];
   }
 
-  const _s = createAddress("0x97a8d775b50215887bfc727940a8d40092542c4e");
-  const _t = createAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  umbraCache['1'] = {}
-  umbraCache['1'][_s] = {}
-  umbraCache['1'][_s][_t] = {
-    fromAddress: '0xbcb4d469894eba499f946a20451b1f073aea9bc1',
-    amount: ethers.BigNumber.from('5366000000')
-  }
-
   const findings: Finding[] = [];
   const networkNumber = txEvent.network as number;
 
@@ -203,35 +195,25 @@ const handleTransaction: HandleTransaction = async (
     // detect `send` transactions
     if (funcHash === sendETHFunctionHash || funcHash === sendTokensFunctionHash) {
       const tokenSent: any = {};
-      if (value.gt(0)) {
-        tokenSent[createAddress("0x0")] = value;
-      }
-
-      const eth_transfer_findings = await ethTransfersHandler.handle(txEvent);
-      for (const finding of eth_transfer_findings) {
-        const ethFromAddress = createAddress(finding.metadata.from);
-        const ethToAddress = createAddress(finding.metadata.to);
-        const ethAmount = finding.metadata.value;
-        if (ethToAddress === umbraContract && ethFromAddress === fromAddress) {
-          if (createAddress("0x0") in tokenSent) {
-            tokenSent[createAddress("0x0")] = tokenSent[createAddress("0x0")].add(ethAmount);
-          } else {
-            tokenSent[createAddress("0x0")] = ethAmount;
-          }
+      if (funcHash === sendETHFunctionHash) {
+        if (value.gt(0)) {
+          tokenSent[createAddress("0x0")] = value;
         }
       }
 
-      const erc20_transfer_findings = await erc20TransfersHandler.handle(txEvent);
-      for (const finding of erc20_transfer_findings) {
-        const erc20TokenAddress = createAddress(finding.metadata.token);
-        const erc20FromAddress = createAddress(finding.metadata.from);
-        const erc20ToAddress = createAddress(finding.metadata.to);
-        const erc20Amount = finding.metadata.amount;
-        if (erc20ToAddress === umbraContract && erc20FromAddress === fromAddress) {
-          if (erc20TokenAddress in tokenSent) {
-            tokenSent[erc20TokenAddress] = tokenSent[erc20TokenAddress].add(erc20Amount);
-          } else {
-            tokenSent[erc20TokenAddress] = erc20Amount;
+      if (funcHash === sendTokensFunctionHash) {
+        const erc20_transfer_findings = await erc20TransfersHandler.handle(txEvent);
+        for (const finding of erc20_transfer_findings) {
+          const erc20TokenAddress = createAddress(finding.metadata.token);
+          const erc20FromAddress = createAddress(finding.metadata.from);
+          const erc20ToAddress = createAddress(finding.metadata.to);
+          const erc20Amount = finding.metadata.amount;
+          if (erc20ToAddress === umbraContract && erc20FromAddress === fromAddress) {
+            if (erc20TokenAddress in tokenSent) {
+              tokenSent[erc20TokenAddress] = tokenSent[erc20TokenAddress].add(erc20Amount);
+            } else {
+              tokenSent[erc20TokenAddress] = erc20Amount;
+            }
           }
         }
       }
@@ -248,10 +230,11 @@ const handleTransaction: HandleTransaction = async (
         if (!(tokenAddress in umbraCache[networkNumber][stealthAddress])) {
           umbraCache[networkNumber][stealthAddress][tokenAddress] = {
             fromAddress: fromAddress,
-            amount: amount,
+            amount: ethers.BigNumber.from(amount),
           };
         } else {
-          umbraCache[networkNumber][stealthAddress][tokenAddress].amount = umbraCache[networkNumber][stealthAddress][tokenAddress].amount.add(amount);
+          umbraCache[networkNumber][stealthAddress][tokenAddress].amount =
+            umbraCache[networkNumber][stealthAddress][tokenAddress].amount.add(amount);
         }
 
         findings.push(
