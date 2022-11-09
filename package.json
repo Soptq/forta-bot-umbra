@@ -1,9 +1,9 @@
 {
-  "name": "forta-agent-starter",
+  "name": "forta-agent-umbra-detector",
   "version": "0.0.1",
-  "description": "Forta Agent Typescript starter project",
+  "description": "Forta Agent that detects Umbra in/out flows",
   "chainIds": [
-    1
+    1, 10, 137, 42161
   ],
   "scripts": {
     "build": "tsc",
@@ -27,6 +27,7 @@
     "forta-agent": "^0.1.10",
     "forta-agent-tools": "github:Soptq/general-agents-module"
   },
+  "repository": "https://github.com/Soptq/forta-bot-umbra",
   "devDependencies": {
     "@types/jest": "^27.0.1",
     "@types/nodemon": "^1.19.0",
