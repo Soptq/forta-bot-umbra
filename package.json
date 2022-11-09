@@ -1,6 +1,6 @@
 {
   "name": "forta-agent-umbra-detector",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Forta Agent that detects Umbra in/out flows",
   "chainIds": [
     1, 10, 137, 42161
