@@ -9,6 +9,7 @@ import {
 } from "forta-agent";
 import { handlers, createAddress } from "forta-agent-tools";
 
+// When Umbra is updated, the following 5 variables are probably the only variables that need to be changed accordingly.
 const umbraContract = createAddress("0xFb2dc580Eed955B528407b4d36FfaFe3da685401");
 const sendETHFunctionHash = "0xbeb9addf";
 const sendTokensFunctionHash = "0xb9bfabe1";

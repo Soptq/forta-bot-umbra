@@ -2,7 +2,9 @@
 
 ## Description
 
-This agent detects the stealth address of Umbra Protocol users.
+This agent detects the stealth address of Umbra Protocol users. This bot is live on:
+
+https://explorer.forta.network/bot/0xdba64bc69511d102162914ef52441275e651f817e297276966be16aeffe013b0
 
 ## Supported Chains
 
